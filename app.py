@@ -1,6 +1,7 @@
 import streamlit as st
 from langchain.chains import ConversationChain
 from langchain_community.llms import Ollama
+import requests
 
 # Initialize the conversation chain
 llm = Ollama(model="llama3", temperature=0.7)
@@ -22,15 +23,22 @@ if st.button("Send"):
     # Get the user's message
     message = user_input
     
-    # Get the response from the conversation chain
-    response = conversation.predict(input=message)
-    
-    # Add the interaction to the history
-    st.session_state.history.append(f"Human: {message}")
-    st.session_state.history.append(f"AI: {response}")
+    try:
+        # Get the response from the conversation chain
+        response = conversation.predict(input=message)
+        
+        # Add the interaction to the history
+        st.session_state.history.append(f"Human: {message}")
+        st.session_state.history.append(f"AI: {response}")
 
-    # Display the response
-    st.write("Model:", response)
+        # Display the response
+        st.write("Model:", response)
+    
+    except requests.exceptions.ConnectionError as e:
+        st.error(f"Connection error: {e}")
+    
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
 
 # Display the conversation history
 st.subheader("Conversation History:")
